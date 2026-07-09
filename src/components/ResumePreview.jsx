@@ -1,6 +1,38 @@
 import React, { useState } from 'react';
 
 /**
+ * Categorize skills dynamically for the academic template
+ */
+function categorizeSkills(skills) {
+  if (!skills) return {};
+  const categories = {
+    'Programming': [],
+    'Libraries & Frameworks': [],
+    'Tools & Platforms': []
+  };
+
+  const programmingKeywords = ['python', 'java', 'c++', 'c#', 'ruby', 'go', 'golang', 'rust', 'php', 'swift', 'kotlin', 'sql', 'html', 'css', 'javascript', 'typescript', 'dsa', 'algorithms', 'structures'];
+  const frameworkKeywords = ['react', 'node', 'django', 'flask', 'spring', 'express', 'vue', 'next', 'angular', 'bootstrap', 'tailwind', 'sass', 'svelte', 'jquery', 'pandas', 'numpy', 'scikit', 'tensorflow', 'pytorch', 'keras', 'cnn'];
+  
+  skills.forEach(skill => {
+    const sLower = skill.toLowerCase();
+    if (programmingKeywords.some(kw => sLower.includes(kw))) {
+      categories['Programming'].push(skill);
+    } else if (frameworkKeywords.some(kw => sLower.includes(kw))) {
+      categories['Libraries & Frameworks'].push(skill);
+    } else {
+      categories['Tools & Platforms'].push(skill);
+    }
+  });
+
+  // Filter empty categories
+  return Object.entries(categories).reduce((acc, [key, val]) => {
+    if (val.length > 0) acc[key] = val;
+    return acc;
+  }, {});
+}
+
+/**
  * Deterministic height-estimation function partitioning resume data into distinct A4 page objects
  */
 function partitionResume(resume, template) {
@@ -62,6 +94,115 @@ function partitionResume(resume, template) {
     currentHeight = 0; // Reset height budget
   };
   
+  if (template === 'academic') {
+    // Custom height settings for academic template
+    currentHeight = 35; // centered header is compact
+    
+    // Reset standard fields that were initialized for Page 1
+    currentPage.experience = [];
+    currentPage.projects = [];
+    currentPage.education = [];
+    currentPage.skills = null;
+    currentPage.showExperienceHeader = false;
+    currentPage.showProjectsHeader = false;
+    currentPage.showEducationHeader = false;
+    currentPage.showSkillsHeader = false;
+
+    // 1. Partition EDUCATION
+    if (resume.education && resume.education.length > 0) {
+      let headerAdded = false;
+      resume.education.forEach((edu) => {
+        const itemHeight = 16;
+        const headerSpace = headerAdded ? 0 : 12;
+        if (currentHeight + itemHeight + headerSpace > PAGE_BUDGET && currentHeight > 50) {
+          createNewPage();
+          headerAdded = false;
+        }
+        if (!headerAdded) {
+          currentPage.showEducationHeader = true;
+          headerAdded = true;
+          currentHeight += 12;
+        }
+        currentPage.education.push(edu);
+        currentHeight += itemHeight;
+      });
+    }
+
+    // 2. Partition PROFILE SUMMARY
+    if (resume.personal?.summary) {
+      const summaryText = resume.personal.summary;
+      const itemHeight = 12 + Math.max(10, Math.ceil(summaryText.length / 90) * 4.5);
+      const headerSpace = 12;
+      
+      if (currentHeight + itemHeight + headerSpace > PAGE_BUDGET && currentHeight > 50) {
+        createNewPage();
+        currentPage.personal = { ...resume.personal, showOnlySummary: true }; // Carry over summary
+      }
+      currentPage.showSummaryHeader = true;
+      currentHeight += itemHeight + headerSpace;
+    }
+
+    // 3. Partition PROJECTS
+    if (resume.projects && resume.projects.length > 0) {
+      let headerAdded = false;
+      resume.projects.forEach((proj) => {
+        const descLength = proj.description ? proj.description.length : 0;
+        const itemHeight = 16 + Math.ceil(descLength / 90) * 4.5;
+        const headerSpace = headerAdded ? 0 : 12;
+        
+        if (currentHeight + itemHeight + headerSpace > PAGE_BUDGET && currentHeight > 50) {
+          createNewPage();
+          headerAdded = false;
+        }
+        if (!headerAdded) {
+          currentPage.showProjectsHeader = true;
+          headerAdded = true;
+          currentHeight += 12;
+        }
+        currentPage.projects.push(proj);
+        currentHeight += itemHeight;
+      });
+    }
+
+    // 4. Partition WORK EXPERIENCE
+    if (resume.experience && resume.experience.length > 0) {
+      let headerAdded = false;
+      resume.experience.forEach((exp) => {
+        const descLength = exp.description ? exp.description.length : 0;
+        const itemHeight = 18 + Math.ceil(descLength / 90) * 4.5;
+        const headerSpace = headerAdded ? 0 : 12;
+        
+        if (currentHeight + itemHeight + headerSpace > PAGE_BUDGET && currentHeight > 50) {
+          createNewPage();
+          headerAdded = false;
+        }
+        if (!headerAdded) {
+          currentPage.showExperienceHeader = true;
+          headerAdded = true;
+          currentHeight += 12;
+        }
+        currentPage.experience.push(exp);
+        currentHeight += itemHeight;
+      });
+    }
+
+    // 5. Partition SKILLS (placed where the page pointer ends)
+    if (resume.skills && resume.skills.length > 0) {
+      const skillsHeight = 12 + Math.ceil(resume.skills.length / 8) * 6;
+      const headerSpace = 12;
+      
+      if (currentHeight + skillsHeight + headerSpace > PAGE_BUDGET && currentHeight > 50) {
+        createNewPage();
+      }
+      currentPage.skills = resume.skills;
+      currentPage.showSkillsHeader = true;
+      currentHeight += skillsHeight + headerSpace;
+    }
+
+    pages.push(currentPage);
+    return pages;
+  }
+
   // 1. Partition WORK EXPERIENCE
   if (resume.experience && resume.experience.length > 0) {
     let headerAdded = false;
@@ -189,6 +330,7 @@ export default function ResumePreview({ resume, updateResume }) {
             <option value="creative">Creative Coral</option>
             <option value="executive">Executive Ivory</option>
             <option value="tech">Tech Minimal</option>
+            <option value="academic">Academic Elite</option>
           </select>
         </div>
 
@@ -697,6 +839,138 @@ export default function ResumePreview({ resume, updateResume }) {
                       <div className="r-section-title" style={{ background: accentColor }}># TECHNOLOGIES & TOOLS</div>
                     )}
                     <p className="r-skills-list">&gt; {pageData.skills.join(', ')}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Academic Elite Template (Replica of PDF style) */}
+            {template === 'academic' && (
+              <div className="resume-sheet template-academic" style={getSheetStyle()}>
+                {pageData.pageIndex === 0 && resume.personal && (
+                  <div className="r-header">
+                    <h1 className="r-name">{resume.personal.name || 'Your Name'}</h1>
+                    <div className="r-contact">
+                      {resume.personal.email && <span>{resume.personal.email}</span>}
+                      {resume.personal.phone && <span>{resume.personal.phone}</span>}
+                      {resume.personal.linkedin && (
+                        <span><a href={resume.personal.linkedin} target="_blank" rel="noreferrer">LinkedIn: {cleanLink(resume.personal.linkedin)}</a></span>
+                      )}
+                      {resume.personal.github && (
+                        <span><a href={resume.personal.github} target="_blank" rel="noreferrer">GitHub: {cleanLink(resume.personal.github)}</a></span>
+                      )}
+                      {resume.personal.location && <span>{resume.personal.location}</span>}
+                      {resume.personal.website && (
+                        <span><a href={resume.personal.website} target="_blank" rel="noreferrer">{cleanLink(resume.personal.website)}</a></span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {pageData.pageIndex > 0 && (
+                  <div className="r-page-indicator">
+                    <span>{resume.personal?.name}</span>
+                    <span>Page {pageData.pageIndex + 1}</span>
+                  </div>
+                )}
+
+                {/* 1. Education */}
+                {pageData.education && pageData.education.length > 0 && (
+                  <div className="r-section">
+                    {pageData.showEducationHeader && (
+                      <h2 className="r-section-title">Education</h2>
+                    )}
+                    {pageData.education.map((edu, index) => (
+                      <div key={index} className="r-education-item">
+                        <div className="r-item-header">
+                          <span className="r-item-title-bold">{edu.school || 'School'}</span>
+                          <span className="r-item-date">{edu.date || ''}</span>
+                        </div>
+                        <div className="r-item-sub">
+                          <span className="r-item-degree">{edu.degree || 'Degree'}</span>
+                          {edu.gpa && <span className="r-item-gpa">{edu.gpa}</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 2. Profile Summary */}
+                {pageData.personal?.summary && pageData.showSummaryHeader && (
+                  <div className="r-section">
+                    <h2 className="r-section-title">Profile Summary</h2>
+                    <p className="r-summary-text">{pageData.personal.summary}</p>
+                  </div>
+                )}
+
+                {/* 3. Projects */}
+                {pageData.projects && pageData.projects.length > 0 && (
+                  <div className="r-section">
+                    {pageData.showProjectsHeader && (
+                      <h2 className="r-section-title">Projects</h2>
+                    )}
+                    {pageData.projects.map((proj, index) => (
+                      <div key={index} className="r-project-item">
+                        <div className="r-item-header">
+                          <span className="r-item-title-bold">{proj.name || 'Project Name'}</span>
+                          <span className="r-item-date">{proj.date || ''}</span>
+                        </div>
+                        {proj.tech && (
+                          <div className="r-project-tools">
+                            <strong>Tools:</strong> {proj.tech}
+                          </div>
+                        )}
+                        {proj.description && (
+                          <p className="r-project-desc">{proj.description}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 4. Work History */}
+                {pageData.experience && pageData.experience.length > 0 && (
+                  <div className="r-section">
+                    {pageData.showExperienceHeader && (
+                      <h2 className="r-section-title">Work History</h2>
+                    )}
+                    {pageData.experience.map((exp, index) => (
+                      <div key={index} className="r-experience-item">
+                        <div className="r-item-header">
+                          <span className="r-item-title-bold">{exp.role || 'Job Role'}</span>
+                          <span className="r-item-date">{exp.startDate || ''} {exp.endDate ? `— ${exp.endDate}` : ''}</span>
+                        </div>
+                        <div className="r-item-sub">
+                          <span className="r-item-company">{exp.company || 'Company'}{exp.location ? ` | ${exp.location}` : ''}</span>
+                        </div>
+                        {exp.description && (
+                          <div className="r-experience-desc-bullets">
+                            {exp.description.split('\n').filter(line => line.trim().length > 0).map((line, lIdx) => (
+                              <div key={lIdx} className="r-desc-bullet-row">
+                                <span className="r-bullet-character">•</span>
+                                <span>{line.replace(/^[•\-*]\s*/, '')}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 5. Skills */}
+                {pageData.skills && pageData.skills.length > 0 && (
+                  <div className="r-section">
+                    {pageData.showSkillsHeader && (
+                      <h2 className="r-section-title">Skills</h2>
+                    )}
+                    <div className="r-skills-categorized">
+                      {Object.entries(categorizeSkills(pageData.skills)).map(([category, items]) => (
+                        <div key={category} className="r-skill-row">
+                          <span className="r-skill-category-name">{category}:</span> {items.join(', ')}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

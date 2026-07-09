@@ -1009,6 +1009,154 @@ button, input, textarea, select {
   line-height: 1.5;
 }
 
+/* Template 5: Academic Elite (Replica of PDF style) */
+.template-academic {
+  color: #000000;
+  background-color: #ffffff;
+}
+.template-academic .r-header {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+.template-academic .r-name {
+  font-size: 20pt;
+  font-weight: 800;
+  color: #000000;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.25rem;
+}
+.template-academic .r-contact {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+  font-size: 8.5pt;
+  color: #000000;
+  font-weight: 500;
+}
+.template-academic .r-contact span {
+  display: inline-flex;
+  align-items: center;
+}
+.template-academic .r-contact span:not(:last-child)::after {
+  content: "|";
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  color: #000000;
+  font-weight: normal;
+}
+.template-academic .r-contact a {
+  color: #000000;
+  text-decoration: none;
+}
+.template-academic .r-contact a:hover {
+  text-decoration: underline;
+}
+.template-academic .r-page-indicator {
+  display: flex;
+  justify-content: space-between;
+  font-size: 7.5pt;
+  color: #475569;
+  border-bottom: 1.5px solid #000000;
+  padding-bottom: 0.2rem;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.template-academic .r-section {
+  margin-bottom: 1.25rem;
+}
+.template-academic .r-section-title {
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: #000000;
+  text-transform: uppercase;
+  border-bottom: 1.5px solid #000000;
+  padding-bottom: 0.15rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.04em;
+}
+.template-academic .r-education-item,
+.template-academic .r-project-item,
+.template-academic .r-experience-item {
+  margin-bottom: 0.75rem;
+}
+.template-academic .r-item-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9.5pt;
+  color: #000000;
+  margin-bottom: 0.1rem;
+}
+.template-academic .r-item-title-bold {
+  font-weight: 700;
+}
+.template-academic .r-item-date {
+  font-weight: 700;
+}
+.template-academic .r-item-sub {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8.5pt;
+  color: #000000;
+  margin-bottom: 0.15rem;
+}
+.template-academic .r-item-degree {
+  font-style: italic;
+}
+.template-academic .r-item-gpa {
+  font-weight: 700;
+}
+.template-academic .r-item-company {
+  font-weight: 700;
+}
+.template-academic .r-project-tools {
+  font-size: 8.5pt;
+  margin-bottom: 0.15rem;
+  color: #000000;
+}
+.template-academic .r-project-desc {
+  font-size: 9pt;
+  color: #000000;
+  line-height: 1.4;
+}
+.template-academic .r-experience-desc-bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.15rem;
+}
+.template-academic .r-desc-bullet-row {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 9pt;
+  color: #000000;
+  line-height: 1.4;
+}
+.template-academic .r-bullet-character {
+  color: #000000;
+  font-weight: 700;
+}
+.template-academic .r-summary-text {
+  font-size: 9pt;
+  color: #000000;
+  line-height: 1.4;
+}
+.template-academic .r-skills-categorized {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.template-academic .r-skill-row {
+  font-size: 9pt;
+  color: #000000;
+  line-height: 1.35;
+}
+.template-academic .r-skill-category-name {
+  font-weight: 700;
+}
+
 /* --- Resume Analyser UI --- */
 .analyser-container {
   display: grid;
