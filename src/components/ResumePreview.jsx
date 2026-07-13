@@ -94,8 +94,8 @@ function partitionResume(resume, template) {
     currentHeight = 0; // Reset height budget
   };
   
-  if (template === 'academic') {
-    // Custom height settings for academic template
+  if (template === 'academic' || template === 'raushan') {
+    // Custom height settings for academic/raushan template
     currentHeight = 35; // centered header is compact
     
     // Reset standard fields that were initialized for Page 1
@@ -331,6 +331,7 @@ export default function ResumePreview({ resume, updateResume }) {
             <option value="executive">Executive Ivory</option>
             <option value="tech">Tech Minimal</option>
             <option value="academic">Academic Elite</option>
+            <option value="raushan">Minimalist Line (PDF Replica)</option>
           </select>
         </div>
 
@@ -900,6 +901,149 @@ export default function ResumePreview({ resume, updateResume }) {
                   <div className="r-section">
                     <h2 className="r-section-title">Profile Summary</h2>
                     <p className="r-summary-text">{pageData.personal.summary}</p>
+                  </div>
+                )}
+
+                {/* 3. Projects */}
+                {pageData.projects && pageData.projects.length > 0 && (
+                  <div className="r-section">
+                    {pageData.showProjectsHeader && (
+                      <h2 className="r-section-title">Projects</h2>
+                    )}
+                    {pageData.projects.map((proj, index) => (
+                      <div key={index} className="r-project-item">
+                        <div className="r-item-header">
+                          <span className="r-item-title-bold">{proj.name || 'Project Name'}</span>
+                          <span className="r-item-date">{proj.date || ''}</span>
+                        </div>
+                        {proj.tech && (
+                          <div className="r-project-tools">
+                            <strong>Tools:</strong> {proj.tech}
+                          </div>
+                        )}
+                        {proj.description && (
+                          <p className="r-project-desc">{proj.description}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 4. Work History */}
+                {pageData.experience && pageData.experience.length > 0 && (
+                  <div className="r-section">
+                    {pageData.showExperienceHeader && (
+                      <h2 className="r-section-title">Work History</h2>
+                    )}
+                    {pageData.experience.map((exp, index) => (
+                      <div key={index} className="r-experience-item">
+                        <div className="r-item-header">
+                          <span className="r-item-title-bold">{exp.role || 'Job Role'}</span>
+                          <span className="r-item-date">{exp.startDate || ''} {exp.endDate ? `— ${exp.endDate}` : ''}</span>
+                        </div>
+                        <div className="r-item-sub">
+                          <span className="r-item-company">{exp.company || 'Company'}{exp.location ? ` | ${exp.location}` : ''}</span>
+                        </div>
+                        {exp.description && (
+                          <div className="r-experience-desc-bullets">
+                            {exp.description.split('\n').filter(line => line.trim().length > 0).map((line, lIdx) => (
+                              <div key={lIdx} className="r-desc-bullet-row">
+                                <span className="r-bullet-character">•</span>
+                                <span>{line.replace(/^[•\-*]\s*/, '')}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 5. Skills */}
+                {pageData.skills && pageData.skills.length > 0 && (
+                  <div className="r-section">
+                    {pageData.showSkillsHeader && (
+                      <h2 className="r-section-title">Skills</h2>
+                    )}
+                    <div className="r-skills-categorized">
+                      {Object.entries(categorizeSkills(pageData.skills)).map(([category, items]) => (
+                        <div key={category} className="r-skill-row">
+                          <span className="r-skill-category-name">{category}:</span> {items.join(', ')}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Raushan PDF Replica Template */}
+            {template === 'raushan' && (
+              <div className="resume-sheet template-raushan" style={getSheetStyle()}>
+                {pageData.pageIndex === 0 && resume.personal && (
+                  <div className="r-header">
+                    <h1 className="r-name">{resume.personal.name || 'Your Name'}</h1>
+                    <div className="r-contact">
+                      {resume.personal.email && <span>{resume.personal.email}</span>}
+                      {resume.personal.phone && <span>{resume.personal.phone}</span>}
+                      {resume.personal.linkedin && (
+                        <span><a href={resume.personal.linkedin} target="_blank" rel="noreferrer">LinkedIn: {cleanLink(resume.personal.linkedin)}</a></span>
+                      )}
+                      {resume.personal.github && (
+                        <span><a href={resume.personal.github} target="_blank" rel="noreferrer">GitHub: {cleanLink(resume.personal.github)}</a></span>
+                      )}
+                      {resume.personal.location && <span>{resume.personal.location}</span>}
+                      {resume.personal.website && (
+                        <span><a href={resume.personal.website} target="_blank" rel="noreferrer">{cleanLink(resume.personal.website)}</a></span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {pageData.pageIndex > 0 && (
+                  <div className="r-page-indicator">
+                    <span>{resume.personal?.name}</span>
+                    <span>Page {pageData.pageIndex + 1}</span>
+                  </div>
+                )}
+
+                {/* 1. Education */}
+                {pageData.education && pageData.education.length > 0 && (
+                  <div className="r-section">
+                    {pageData.showEducationHeader && (
+                      <h2 className="r-section-title">Education</h2>
+                    )}
+                    {pageData.education.map((edu, index) => (
+                      <div key={index} className="r-education-item">
+                        <div className="r-item-header">
+                          <span className="r-item-title-bold">{edu.school || 'School'}</span>
+                          <span className="r-item-date">{edu.date || ''}</span>
+                        </div>
+                        <div className="r-item-sub">
+                          <span className="r-item-degree">{edu.degree || 'Degree'}</span>
+                          {edu.gpa && <span className="r-item-gpa">{edu.gpa}</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 2. Profile Summary */}
+                {pageData.personal?.summary && pageData.showSummaryHeader && (
+                  <div className="r-section">
+                    <h2 className="r-section-title">Profile Summary</h2>
+                    {pageData.personal.summary.includes('\n') ? (
+                      <div className="r-experience-desc-bullets">
+                        {pageData.personal.summary.split('\n').filter(line => line.trim().length > 0).map((line, lIdx) => (
+                          <div key={lIdx} className="r-desc-bullet-row">
+                            <span className="r-bullet-character">•</span>
+                            <span>{line.replace(/^[•\-*]\s*/, '')}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="r-summary-text">{pageData.personal.summary}</p>
+                    )}
                   </div>
                 )}
 

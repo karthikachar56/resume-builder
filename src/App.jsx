@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Dashboard from './components/Dashboard';
 import ResumeBuilder from './components/ResumeBuilder';
 import ResumeAnalyser from './components/ResumeAnalyser';
+import AiResumeBuilder from './components/AiResumeBuilder';
 
 const INITIAL_RESUME_DATA = {
   personal: {
@@ -73,7 +74,7 @@ const INITIAL_RESUME_DATA = {
 export default function App() {
   const [tab, setTab] = useState('dashboard'); // dashboard, builder, analyser
   const [resume, setResume] = useState(INITIAL_RESUME_DATA);
-  const [theme, setTheme] = useState('dark'); // dark, light
+  const [theme, setTheme] = useState('light'); // dark, light
 
   // Persist resume and theme in local storage if desired
   useEffect(() => {
@@ -109,31 +110,39 @@ export default function App() {
   return (
     <div className="app-root-layout">
       {/* App Header */}
-      <header className="app-header">
+      <header className="app-header glass glow">
         <div className="logo-section" onClick={() => setTab('dashboard')}>
-          <div className="logo-icon">R</div>
-          <span className="logo-text">ResumeCraft & Analyser</span>
+          <div className="logo-icon">✨</div>
+          <span className="logo-text">ResumeCraft<span className="logo-accent">.AI</span></span>
         </div>
 
         <nav className="nav-actions">
-          <button 
-            className={`btn btn-sm ${tab === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setTab('dashboard')}
-          >
-            Dashboard
-          </button>
-          <button 
-            className={`btn btn-sm ${tab === 'builder' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setTab('builder')}
-          >
-            Builder Workspace
-          </button>
-          <button 
-            className={`btn btn-sm ${tab === 'analyser' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setTab('analyser')}
-          >
-            ATS Analyser
-          </button>
+          <div className="nav-tabs">
+            <button 
+              className={`nav-tab ${tab === 'dashboard' ? 'active' : ''}`}
+              onClick={() => setTab('dashboard')}
+            >
+              <span>📊</span> Dashboard
+            </button>
+            <button 
+              className={`nav-tab ${tab === 'builder' ? 'active' : ''}`}
+              onClick={() => setTab('builder')}
+            >
+              <span>📝</span> Editor Workspace
+            </button>
+            <button 
+              className={`nav-tab ${tab === 'ai-builder' ? 'active' : ''}`}
+              onClick={() => setTab('ai-builder')}
+            >
+              <span>🤖</span> AI Generator
+            </button>
+            <button 
+              className={`nav-tab ${tab === 'analyser' ? 'active' : ''}`}
+              onClick={() => setTab('analyser')}
+            >
+              <span>🔍</span> ATS Scanner
+            </button>
+          </div>
 
           {/* Theme Toggle Button */}
           <button className="theme-toggle-btn" onClick={toggleTheme} title="Toggle Dark/Light Mode">
@@ -162,6 +171,7 @@ export default function App() {
       <main className="app-main-layout">
         {tab === 'dashboard' && <Dashboard resume={resume} setTab={setTab} />}
         {tab === 'builder' && <ResumeBuilder resume={resume} updateResume={updateResume} />}
+        {tab === 'ai-builder' && <AiResumeBuilder updateResume={updateResume} setTab={setTab} />}
         {tab === 'analyser' && <ResumeAnalyser resume={resume} />}
       </main>
     </div>

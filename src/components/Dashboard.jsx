@@ -1,108 +1,226 @@
 import React from 'react';
+import { analyzeResume } from '../utils/analyzer';
 
 export default function Dashboard({ resume, setTab }) {
-  // Compute some quick stats if resume data exists
-  const hasData = resume && (resume.personal?.name || resume.experience?.length > 0 || resume.skills?.length > 0);
+  // 1. Calculate live ATS metrics using the core analyzer helper
+  const analysis = analyzeResume(resume);
+  const atsScore = analysis.score || 0;
+  const recommendations = analysis.recommendations || [];
+
+  // 2. Calculate profile completeness percentage
+  let completedSectionsCount = 0;
+  const sectionsList = [
+    { label: "Personal Details", isDone: !!resume?.personal?.name && !!resume?.personal?.email },
+    { label: "Summary Statement", isDone: !!resume?.personal?.summary },
+    { label: "Professional History", isDone: resume?.experience && resume?.experience.length > 0 },
+    { label: "Educational History", isDone: resume?.education && resume?.education.length > 0 },
+    { label: "Core Skills", isDone: resume?.skills && resume?.skills.length > 0 },
+    { label: "Projects Portfolio", isDone: resume?.projects && resume?.projects.length > 0 }
+  ];
   
+  sectionsList.forEach(sec => {
+    if (sec.isDone) completedSectionsCount++;
+  });
+  
+  const completenessPercent = Math.round((completedSectionsCount / sectionsList.length) * 100);
+
+  // 3. Define dashboard action routes
+  const ACTION_HUB_CARDS = [
+    {
+      id: 'ai-builder',
+      title: 'Conversational AI Creator',
+      desc: 'Build a premium resume from scratch via a step-by-step chat interview. The A4 sheet templates format and edit themselves live.',
+      icon: '🤖',
+      badge: 'Interactive AI',
+      badgeClass: 'badge-accent',
+      btnText: 'Start Interview',
+      tabName: 'ai-builder',
+      primary: true
+    },
+    {
+      id: 'builder',
+      title: 'Document Workspace',
+      desc: 'Fine-tune your resume sections, swap between layouts (including the PDF Replica template), and configure colors/fonts.',
+      icon: '📝',
+      badge: 'Manual Editor',
+      badgeClass: 'badge-secondary',
+      btnText: 'Open Workspace',
+      tabName: 'builder',
+      primary: false
+    },
+    {
+      id: 'analyser',
+      title: 'ATS Scanner & Matcher',
+      desc: 'Scan your formatting rules, check action verb usage, and paste job listings to extract keyword score metrics.',
+      icon: '🔍',
+      badge: 'Resume Auditor',
+      badgeClass: 'badge-success',
+      btnText: 'Analyze Score',
+      tabName: 'analyser',
+      primary: false
+    }
+  ];
+
   return (
     <div className="dashboard-view container">
-      <div className="hero-section">
-        <h1 className="hero-title">Craft an ATS-Optimized Resume</h1>
-        <p className="hero-subtitle">
-          Build a visually stunning resume, analyze it against core applicant tracking systems (ATS), and match it directly to your target job descriptions using rules and AI.
+      {/* 1. HERO BANNER */}
+      <div className="hero-section" style={{ marginBottom: '2.5rem' }}>
+        <h1 className="hero-title" style={{ fontSize: '2.8rem' }}>Create Your ATS-Perfect Resume</h1>
+        <p className="hero-subtitle" style={{ maxWidth: '650px' }}>
+          Interactively build your resume using conversational AI creators, audit formatting against applicant tracking rules, and land more developer interviews.
         </p>
       </div>
 
-      {hasData && (
-        <div className="glass glow" style={{ padding: '1.5rem 2rem', marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem', borderLeft: '4px solid var(--accent)' }}>
-          <div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Welcome Back, {resume.personal.name || 'Professional'}</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-              Your resume contains {resume.experience?.length || 0} experience entries, {resume.projects?.length || 0} projects, and {resume.skills?.length || 0} skills.
+      {/* 2. STATS & ANALYTICS PANELS */}
+      <div className="dashboard-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+        
+        {/* Metric 1: Live ATS Score Dial */}
+        <div className="glass glow metric-stat-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>ATS Score Indicator</span>
+            <span style={{ fontSize: '1.25rem' }}>🎯</span>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <div className="radial-score-ring" style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: `conic-gradient(var(${atsScore >= 75 ? '--accent-success' : atsScore >= 50 ? '--accent-warning' : '--accent-danger'}) ${atsScore * 3.6}deg, var(--border-color) 0deg)`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative'
+            }}>
+              <div className="radial-score-inner" style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'var(--bg-secondary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.2rem',
+                fontWeight: 800,
+                color: 'var(--text-primary)'
+              }}>
+                {atsScore}%
+              </div>
+            </div>
+            
+            <div>
+              <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                {atsScore >= 75 ? 'ATS Optimized' : atsScore >= 50 ? 'Needs Refinements' : 'Incomplete Profile'}
+              </h4>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem', lineHeight: 1.4 }}>
+                {atsScore >= 75 ? 'Looking great! Your layout and content density are optimized for recruiters.' : 'Add active verbs and achievements to improve scan rates.'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Metric 2: Resume Completeness Meter */}
+        <div className="glass glow metric-stat-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Profile Completeness</span>
+            <span style={{ fontSize: '1.25rem' }}>📊</span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flexGrow: 1, justifyContent: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700 }}>
+              <span>Sections Filled</span>
+              <span>{completenessPercent}%</span>
+            </div>
+            <div className="progress-bar-bg" style={{ height: '8px', background: 'var(--border-color)', borderRadius: '4px', overflow: 'hidden' }}>
+              <div className="progress-bar-fill" style={{ height: '100%', width: `${completenessPercent}%`, background: 'var(--accent)', borderRadius: '4px', transition: 'width 0.4s ease' }} />
+            </div>
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+              Completed {completedSectionsCount} of {sectionsList.length} critical resume fields.
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <button className="btn btn-secondary" onClick={() => setTab('analyser')}>
-              View ATS Score
-            </button>
-            <button className="btn btn-primary" onClick={() => setTab('builder')}>
-              Resume Workspace
-            </button>
+        </div>
+
+        {/* Metric 3: Data Summary Counts */}
+        <div className="glass glow metric-stat-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Workspace Summary</span>
+            <span style={{ fontSize: '1.25rem' }}>📁</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', flexGrow: 1, alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent)' }}>{resume.experience?.length || 0}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Jobs Listed</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent)' }}>{resume.projects?.length || 0}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Projects Done</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent)' }}>{resume.skills?.length || 0}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Skills Added</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent)' }}>{resume.education?.length || 0}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Degrees Saved</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* 3. DYNAMIC ACTIONS HUB CONTAINER */}
+      <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <span>🚀</span> Workspace Hub Actions
+      </h3>
+      
+      <div className="features-grid" style={{ marginBottom: '3rem' }}>
+        {ACTION_HUB_CARDS.map((card) => (
+          <div key={card.id} className="feature-card glass glow" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', cursor: 'pointer', transition: 'all var(--transition-fast)' }} onClick={() => setTab(card.tabName)}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="feature-icon-wrapper" style={{ fontSize: '1.5rem' }}>
+                {card.icon}
+              </div>
+              <span className={`badge ${card.badgeClass}`} style={{ fontSize: '0.7rem', padding: '0.2rem 0.6rem', borderRadius: '1rem', fontWeight: 600 }}>
+                {card.badge}
+              </span>
+            </div>
+            
+            <div style={{ flexGrow: 1 }}>
+              <h3 className="feature-card-title" style={{ fontSize: '1.15rem', fontWeight: 700, margin: '0.5rem 0' }}>{card.title}</h3>
+              <p className="feature-card-description" style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                {card.desc}
+              </p>
+            </div>
+            
+            <div className="feature-card-action" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 700, color: card.primary ? 'var(--accent)' : 'var(--text-primary)', marginTop: '0.5rem' }}>
+              {card.btnText}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 4. DYNAMIC ATS SCORE TIPS & AUDIT RECOMMENDATIONS */}
+      {recommendations.length > 0 && (
+        <div className="glass glow recommendations-panel" style={{ padding: '2rem', borderRadius: '1rem', borderLeft: '4px solid var(--accent)' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+            <span>💡</span> Live Recommendations to Boost ATS Rankings
+          </h3>
+          <div style={{ display: 'grid', gap: '0.75rem' }}>
+            {recommendations.map((rec, index) => (
+              <div key={index} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                <span style={{ color: 'var(--accent)', fontWeight: 800 }}>•</span>
+                <span>{rec}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      <div className="features-grid">
-        {/* Card 1: Resume Builder */}
-        <div className="feature-card glass glow" onClick={() => setTab('builder')}>
-          <div className="feature-icon-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-          </div>
-          <h3 className="feature-card-title">Interactive Resume Workspace</h3>
-          <p className="feature-card-description">
-            Build your resume section-by-section. Choose from premium templates, customize font sizes, colors, and layouts in real-time, then export directly to PDF.
-          </p>
-          <div className="feature-card-action">
-            Open Builder
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </div>
-        </div>
-
-        {/* Card 2: ATS Analyser */}
-        <div className="feature-card glass glow" onClick={() => setTab('analyser')}>
-          <div className="feature-icon-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="16" x2="12" y2="12"></line>
-              <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
-          </div>
-          <h3 className="feature-card-title">ATS Resume Scanner</h3>
-          <p className="feature-card-description">
-            Scan your resume against critical ATS filtering rules. Checks formatting standards, content sections, action verb density, and quantifiable results.
-          </p>
-          <div className="feature-card-action">
-            Scan Resume
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </div>
-        </div>
-
-        {/* Card 3: Job Matcher */}
-        <div className="feature-card glass glow" onClick={() => setTab('analyser')}>
-          <div className="feature-icon-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="m4.93 4.93 4.24 4.24"></path>
-              <path d="m14.83 9.17 4.24-4.24"></path>
-              <path d="m14.83 14.83 4.24 4.24"></path>
-              <path d="m9.17 14.83-4.24 4.24"></path>
-            </svg>
-          </div>
-          <h3 className="feature-card-title">Job Description Matching</h3>
-          <p className="feature-card-description">
-            Paste target job postings to compare keywords. Identify critical skills, technologies, and action verbs missing from your current resume.
-          </p>
-          <div className="feature-card-action">
-            Match Keywords
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
