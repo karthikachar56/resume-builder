@@ -305,3 +305,245 @@ export function getSimulationData(inputs) {
     skills: mockSkills
   };
 }
+
+const UPLOAD_ANALYSIS_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    score: { type: "INTEGER" },
+    breakdown: {
+      type: "OBJECT",
+      properties: {
+        completeness: { type: "INTEGER" },
+        actionVerbs: { type: "INTEGER" },
+        quantifiable: { type: "INTEGER" },
+        formatting: { type: "INTEGER" }
+      },
+      required: ["completeness", "actionVerbs", "quantifiable", "formatting"]
+    },
+    recommendations: {
+      type: "ARRAY",
+      items: { type: "STRING" }
+    },
+    extractedResume: {
+      type: "OBJECT",
+      properties: {
+        personal: {
+          type: "OBJECT",
+          properties: {
+            name: { type: "STRING" },
+            title: { type: "STRING" },
+            email: { type: "STRING" },
+            phone: { type: "STRING" },
+            location: { type: "STRING" },
+            website: { type: "STRING" },
+            linkedin: { type: "STRING" },
+            github: { type: "STRING" },
+            summary: { type: "STRING" }
+          },
+          required: ["name", "title", "email", "summary"]
+        },
+        experience: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              company: { type: "STRING" },
+              role: { type: "STRING" },
+              startDate: { type: "STRING" },
+              endDate: { type: "STRING" },
+              location: { type: "STRING" },
+              description: { type: "STRING" }
+            },
+            required: ["company", "role", "startDate", "endDate", "description"]
+          }
+        },
+        education: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              school: { type: "STRING" },
+              degree: { type: "STRING" },
+              date: { type: "STRING" },
+              gpa: { type: "STRING" }
+            },
+            required: ["school", "degree", "date"]
+          }
+        },
+        projects: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              name: { type: "STRING" },
+              tech: { type: "STRING" },
+              link: { type: "STRING" },
+              date: { type: "STRING" },
+              description: { type: "STRING" }
+            },
+            required: ["name", "tech", "description"]
+          }
+        },
+        skills: {
+          type: "ARRAY",
+          items: { type: "STRING" }
+        }
+      },
+      required: ["personal", "experience", "education", "projects", "skills"]
+    }
+  },
+  required: ["score", "breakdown", "recommendations", "extractedResume"]
+};
+
+/**
+ * Sends a PDF or TXT file to Gemini for structured ATS analysis and data extraction
+ */
+export async function analyzeUploadedResume(apiKey, fileData, mimeType, isBase64 = false) {
+  const key = apiKey || import.meta.env.VITE_GEMINI_API_KEY;
+  if (!key) {
+    throw new Error("API key is required to call the live service. Please verify VITE_GEMINI_API_KEY in the .env file.");
+  }
+
+  const promptText = `
+    You are a world-class executive resume writer and ATS auditor.
+    Analyze the uploaded resume document to perform a thorough ATS audit:
+    1. Score the resume from 0 to 100 based on completeness (up to 25 pts), action verbs (up to 25 pts), quantifiable metrics/business impact (up to 25 pts), and formatting standards (up to 25 pts).
+    2. Provide a list of 3-5 actionable recommendations to optimize the resume for ATS filtering.
+    3. Extract all details (Name, title, email, phone, experiences, education, projects, skills) into the requested JSON schema structure under 'extractedResume' so the user can import it directly. Ensure descriptions for experience and projects are detailed.
+  `;
+
+  let contentPart;
+  if (isBase64) {
+    // Strip data URI header if present
+    const base64Clean = fileData.replace(/^data:[^;]+;base64,/, '');
+    contentPart = {
+      inlineData: {
+        mimeType: mimeType,
+        data: base64Clean
+      }
+    };
+  } else {
+    contentPart = {
+      text: `Resume Text:\n---\n${fileData}\n---\n`
+    };
+  }
+
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              contentPart,
+              { text: promptText }
+            ]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: UPLOAD_ANALYSIS_SCHEMA
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error?.message || `API error with status ${response.status}`;
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!textContent) {
+      throw new Error("Empty response returned from the Gemini AI analysis engine.");
+    }
+
+    return JSON.parse(textContent);
+  } catch (error) {
+    console.error("Gemini Resume Analysis API call failed:", error);
+    throw error;
+  }
+}
+
+/**
+ * Returns a high-fidelity simulated response for uploads during simulation fallback mode
+ */
+export async function getSimulatedUploadAnalysis(fileName) {
+  // Simulate delay
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  const isRaushan = fileName.toLowerCase().includes("raushan") || fileName.toLowerCase().includes("kumar");
+
+  const extractedResume = {
+    personal: {
+      name: isRaushan ? "RAUSHAN KUMAR BAITHA" : "Jane Doe",
+      title: isRaushan ? "Software Developer Intern" : "Senior Frontend Developer",
+      email: isRaushan ? "raushanbaitha12@gmail.com" : "jane.doe@example.com",
+      phone: isRaushan ? "+91 7892750656" : "+1 (555) 234-5678",
+      location: isRaushan ? "Bengaluru, India" : "San Francisco, CA",
+      website: "",
+      linkedin: "https://www.linkedin.com/in/raushan-kumar-baitha/",
+      github: "https://github.com/raushankumar",
+      summary: isRaushan 
+        ? "Enthusiastic and detail-oriented Computer Science graduate with hands-on experience in full-stack web development and AI models. Proficient in Python, Django, SQL, and data visualization tools."
+        : "Accomplished Senior Frontend Developer with 7+ years of experience building responsive SaaS applications. Dedicated to optimizing web bundle sizes, raising global unit test coverage, and implementing high-fidelity designs."
+    },
+    experience: [
+      {
+        company: isRaushan ? "Edunet Foundation" : "Starlight SaaS Technologies",
+        role: isRaushan ? "Software Engineer Intern" : "Senior Frontend Developer",
+        startDate: isRaushan ? "Oct 2023" : "Jan 2021",
+        endDate: isRaushan ? "Mar 2024" : "Present",
+        location: isRaushan ? "Bengaluru, India" : "San Francisco, CA",
+        description: isRaushan
+          ? "Contributed to building standard web APIs and pages using Python Django.\nCollaborated in writing SQL queries to support data parsing.\nParticipated in team Agile Scrum sprints."
+          : "Led a team of 4 frontend engineers to redesign the analytics dashboard using React and Tailwind CSS, increasing page interaction speed by 40%.\nRefactored legacy state models using Redux Toolkit, decreasing memory footprint spikes by 25%.\nAuthored automated test suites raising global code coverage metrics from 50% to 92%."
+      }
+    ],
+    education: [
+      {
+        school: isRaushan ? "Sri Krishna Institute of Technology" : "Stanford University",
+        degree: isRaushan ? "Bachelor of Engineering in CS" : "M.S. in Computer Science",
+        date: isRaushan ? "Dec 2020 - Jun 2024" : "Sep 2018 - Jun 2020",
+        gpa: isRaushan ? "CGPA: 8.16" : "GPA: 3.9/4.0"
+      }
+    ],
+    projects: [
+      {
+        name: isRaushan ? "Image Classification from Fingerprints" : "Auto-ATS Resume Scanner Portal",
+        tech: isRaushan ? "Python, Flask, TensorFlow, OpenCV" : "React, TypeScript, Node.js, PostgreSQL",
+        link: "",
+        date: "Jan 2024",
+        description: isRaushan
+          ? "Developed an image processing script utilizing convolutional neural networks (CNNs) to analyze fingerprint templates, achieving 92% classification accuracy."
+          : "Built a serverless text parser scanning resume layouts against common keyword density frameworks, reducing custom match rendering latency to under 300ms."
+      }
+    ],
+    skills: isRaushan 
+      ? ["Python", "Java", "Django", "SQL", "HTML", "CSS", "JavaScript", "Git"]
+      : ["React", "TypeScript", "JavaScript", "Redux", "Tailwind CSS", "Node.js", "Jest", "Git", "Docker"]
+  };
+
+  return {
+    score: 82,
+    breakdown: {
+      completeness: 22,
+      actionVerbs: 20,
+      quantifiable: 20,
+      formatting: 20
+    },
+    recommendations: [
+      "Add more active verb starters to your work experiences to emphasize impact.",
+      "Quantify your project metrics (e.g. state size reduction, exact load times, transaction increases).",
+      "Include links to your personal portfolio or public GitHub repositories."
+    ],
+    extractedResume
+  };
+}

@@ -2528,3 +2528,78 @@ button, input, textarea, select {
   color: #64748b;
   margin-top: 0.25rem;
 }
+
+/* --- AI Resume File Uploader & Scanner Styles --- */
+.file-drop-zone {
+  border: 2.5px dashed var(--border-color);
+  background: rgba(99, 102, 241, 0.01);
+  padding: 3rem 2rem;
+  border-radius: 0.75rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.file-drop-zone:hover {
+  border-color: var(--accent);
+  background: rgba(99, 102, 241, 0.03);
+}
+
+.file-drop-zone.drag-active {
+  border-color: var(--accent-success);
+  background: rgba(16, 185, 129, 0.06);
+  transform: scale(1.02);
+}
+
+.upload-icon {
+  transition: transform var(--transition-normal);
+}
+
+.file-drop-zone:hover .upload-icon {
+  transform: translateY(-4px) scale(1.08);
+}
+
+/* Scanning loading indicators */
+.scanning-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid rgba(99, 102, 241, 0.1);
+  border-left-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.scanner-line-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, transparent, var(--accent), transparent);
+  animation: shimmer-line 2.2s infinite ease-in-out;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes shimmer-line {
+  0% { transform: scaleX(0.1); opacity: 0; }
+  50% { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(0.1); opacity: 0; }
+}
+
+.empty-upload-placeholder {
+  animation: fadeIn var(--transition-normal);
+}
+
+.scan-success-card {
+  animation: slideUp var(--transition-fast);
+}

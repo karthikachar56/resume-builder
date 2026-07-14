@@ -172,7 +172,7 @@ export default function App() {
         {tab === 'dashboard' && <Dashboard resume={resume} setTab={setTab} />}
         {tab === 'builder' && <ResumeBuilder resume={resume} updateResume={updateResume} />}
         {tab === 'ai-builder' && <AiResumeBuilder updateResume={updateResume} setTab={setTab} />}
-        {tab === 'analyser' && <ResumeAnalyser resume={resume} />}
+        {tab === 'analyser' && <ResumeAnalyser resume={resume} updateResume={updateResume} setTab={setTab} />}
       </main>
 
       {/* Global App Footer */}
