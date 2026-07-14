@@ -110,7 +110,7 @@ export async function getCopilotResponse(apiKey, currentResume, chatHistory) {
     parts: [{ text: msg.content }]
   }));
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${key}`;
 
   try {
     const response = await fetch(endpoint, {

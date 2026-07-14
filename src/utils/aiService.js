@@ -98,8 +98,8 @@ export async function generateResumeFromAi(apiKey, inputs) {
     5. The skills array must list key tech stacks, tools, and methodologies aligned with the role.
   `;
 
-  // We use gemini-2.5-flash which supports responseSchema
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+  // We use gemini-3.5-flash which supports responseSchema
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${key}`;
 
   try {
     const response = await fetch(endpoint, {
@@ -428,7 +428,7 @@ export async function analyzeUploadedResume(apiKey, fileData, mimeType, isBase64
     };
   }
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${key}`;
 
   try {
     const response = await fetch(endpoint, {
