@@ -19,10 +19,15 @@ export default function ResumeChatCopilot({ resume, updateResume }) {
   // Check if env key is loaded
   const isEnvKeyLoaded = !!import.meta.env.VITE_GEMINI_API_KEY;
 
-  // Load API Key from local storage if available
+  // Load API Key from local storage if available, cleaning up the old invalid key
   useEffect(() => {
     const savedKey = localStorage.getItem('gemini_api_key');
-    if (savedKey) {
+    const isOldInvalidKey = savedKey && savedKey.startsWith('AQ.Ab8RN6IJr79i_Q1DW') && savedKey.length > 40;
+    
+    if (isOldInvalidKey) {
+      localStorage.removeItem('gemini_api_key');
+      setApiKey('');
+    } else if (savedKey) {
       setApiKey(savedKey);
     }
   }, []);

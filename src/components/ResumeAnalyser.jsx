@@ -14,6 +14,20 @@ export default function ResumeAnalyser({ resume, updateResume, setTab }) {
   const [aiScanResult, setAiScanResult] = useState(null);
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [dragActive, setDragActive] = useState(false);
+  const [customApiKey, setCustomApiKey] = useState('');
+
+  // Sync API Key from local storage on mount, and clean up the old invalid key
+  useEffect(() => {
+    const savedKey = localStorage.getItem('gemini_api_key');
+    const isOldInvalidKey = savedKey && savedKey.startsWith('AQ.Ab8RN6IJr79i_Q1DW') && savedKey.length > 40;
+    
+    if (isOldInvalidKey) {
+      localStorage.removeItem('gemini_api_key');
+      setCustomApiKey('');
+    } else if (savedKey) {
+      setCustomApiKey(savedKey);
+    }
+  }, []);
 
   // Recalculate ATS score whenever the resume content changes or mode switches
   useEffect(() => {
@@ -90,7 +104,7 @@ export default function ResumeAnalyser({ resume, updateResume, setTab }) {
         }
       });
 
-      const apiKey = localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY;
+      const apiKey = customApiKey || import.meta.env.VITE_GEMINI_API_KEY;
 
       let result;
       if (!apiKey) {
@@ -268,7 +282,44 @@ export default function ResumeAnalyser({ resume, updateResume, setTab }) {
       <div className="jd-panel">
         {activeMode === 'upload' && (
           <div className="glass glow" style={{ padding: '2rem 1.5rem', marginBottom: '1rem' }}>
-            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', fontWeight: 600 }}>Upload External Resume</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>Upload External Resume</h2>
+              <button 
+                className="chat-settings-btn" 
+                style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', padding: '0.25rem 0.5rem', borderRadius: '0.35rem', fontSize: '0.7rem', cursor: 'pointer' }}
+                onClick={() => setShowApiKey(!showApiKey)}
+              >
+                {showApiKey ? "Hide Key ✖" : "Settings ⚙"}
+              </button>
+            </div>
+
+            {showApiKey && (
+              <div className="glass" style={{ padding: '1rem', marginBottom: '1rem', background: 'rgba(99, 102, 241, 0.03)', border: '1px solid var(--border-color)', borderRadius: '0.5rem' }}>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', lineHeight: 1.4 }}>
+                  Save your custom Google Gemini API Key below, or clear it to use the workspace's default key from <code>.env</code>.
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="password"
+                    className="form-input"
+                    style={{ flexGrow: 1, padding: '0.35rem 0.5rem', fontSize: '0.75rem' }}
+                    placeholder="Enter custom Gemini API key..."
+                    value={customApiKey}
+                    onChange={handleApiKeyChange}
+                  />
+                  {customApiKey && (
+                    <button 
+                      className="btn btn-secondary btn-sm" 
+                      onClick={clearApiKey}
+                      style={{ padding: '0.35rem 0.5rem' }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
               Upload your existing PDF or plain text resume. Our AI model will extract structural content nodes, identify contact fields, and perform a complete ATS audit.
             </p>
