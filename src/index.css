@@ -1534,14 +1534,17 @@ button, input, textarea, select {
     border: none !important;
     box-shadow: none !important;
     background: #ffffff !important;
-    page-break-after: always !important;
-    break-after: page !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
     position: relative !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
     transform: none !important;
+  }
+
+  .resume-sheet:not(:last-child) {
+    page-break-after: always !important;
+    break-after: page !important;
   }
 
   /* Standard padding overrides for print templates */
