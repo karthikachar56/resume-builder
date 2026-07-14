@@ -174,6 +174,17 @@ export default function App() {
         {tab === 'ai-builder' && <AiResumeBuilder updateResume={updateResume} setTab={setTab} />}
         {tab === 'analyser' && <ResumeAnalyser resume={resume} />}
       </main>
+
+      {/* Global App Footer */}
+      <footer className="app-footer">
+        <div className="footer-content">
+          <p className="footer-title">Official Student Learning Ecosystem</p>
+          <p className="footer-powered">
+            Powered by <strong>EETIRP LTD</strong>
+          </p>
+          <p className="footer-copyright">© 2026 KAURAHUB • All Rights Reserved</p>
+        </div>
+      </footer>
     </div>
   );
 }

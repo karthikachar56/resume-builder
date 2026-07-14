@@ -2475,3 +2475,56 @@ button, input, textarea, select {
     padding: 0.75rem 1rem !important;
   }
 }
+
+/* --- App Footer Styles --- */
+.app-footer {
+  background-color: #0b0f19; /* Default background */
+  color: #94a3b8;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+  transition: background-color var(--transition-normal), border-color var(--transition-normal);
+}
+
+/* Override background specifically for dark/light themes if desired, but matches user's screenshot */
+.dark-theme .app-footer {
+  background-color: #080c14; /* Deep dark blue-black */
+  border-top-color: #1e293b;
+}
+
+.light-theme .app-footer {
+  background-color: #0d1527; /* Dark navy from screenshot is preferred, keeping it dark as requested */
+  border-top-color: rgba(255, 255, 255, 0.05);
+}
+
+.footer-content {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer-title {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+.footer-powered {
+  font-size: 0.95rem;
+  color: #cbd5e1;
+  font-weight: 400;
+}
+
+.footer-powered strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.footer-copyright {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
