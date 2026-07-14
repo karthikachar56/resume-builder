@@ -1459,84 +1459,122 @@ button, input, textarea, select {
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* --- Print Media Formatting --- */
+/* --- Consolidated Print Styles for Perfect A4 PDFs --- */
 @media print {
   @page {
     size: A4;
     margin: 0;
   }
-  
-  html, body, #root, .app-root-layout, .app-main-layout {
+
+  html, body {
     background: #ffffff !important;
-    color: #1e293b !important;
-    padding: 0 !important;
+    color: #000000 !important;
     margin: 0 !important;
-    width: 210mm !important;
-    height: auto !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important; /* Allow multi-page documents to grow naturally */
     min-height: 0 !important;
     overflow: visible !important;
+    font-size: 9.5pt !important;
     display: block !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  
+
+  /* Reset all main React app structural wrapper layout widths/heights/scrollbars */
+  #root,
+  .app-root-layout,
+  .app-main-layout,
+  .builder-workspace,
+  .preview-panel,
+  .preview-container-wrapper,
+  .ai-builder-layout,
+  .ai-preview-column,
+  .ai-preview-results-wrapper,
+  .ai-preview-sandbox-frame {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  /* Hide entire interactive layout elements */
   .app-header,
-  .builder-workspace > .editor-panel,
+  .editor-panel,
   .preview-controls,
-  .panel-header,
   .dashboard-view,
-  .analyser-container {
+  .analyser-container,
+  .analyser-view,
+  .preview-success-banner,
+  .copilot-chat-container,
+  .ai-form-column,
+  .ai-preview-empty-state,
+  .empty-icon-circle,
+  .chat-key-status,
+  .chat-input-footer,
+  .chat-prompt-chips-container,
+  button,
+  footer {
     display: none !important;
   }
 
-  .builder-workspace,
-  .preview-panel,
-  .preview-container-wrapper {
-    display: block !important;
-    width: 210mm !important;
-    height: auto !important;
-    overflow: visible !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #ffffff !important;
-  }
-
+  /* Configure the resume sheets to take up exact A4 dimension and page breaks */
   .resume-sheet {
-    transform: none !important;
-    box-shadow: none !important;
-    margin: 0 !important;
     width: 210mm !important;
     height: 297mm !important;
     min-height: 297mm !important;
-    box-sizing: border-box !important;
+    margin: 0 auto !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
     page-break-after: always !important;
     break-after: page !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+    position: relative !important;
+    box-sizing: border-box !important;
     overflow: hidden !important;
+    transform: none !important;
   }
-  
+
+  /* Standard padding overrides for print templates */
+  .template-modern,
+  .template-creative,
+  .template-executive,
+  .template-tech,
+  .template-academic,
+  .template-raushan {
+    padding: 20mm !important;
+  }
+
+  /* Force background colors for the creative template sidebar on print */
+  .template-creative .sidebar-col {
+    background: #f8fafc !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Prevent elements like jobs or projects from breaking awkwardly across pages */
   .r-experience-item,
-  .r-project-item {
+  .r-project-item,
+  .r-education-item {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
 
-  .r-section {
-    page-break-inside: auto !important;
-    break-inside: auto !important;
-  }
-
+  .resume-sheet h1,
   .resume-sheet h2,
   .resume-sheet h3,
   .r-section-title {
     page-break-after: avoid !important;
     break-after: avoid-page !important;
-  }
-
-  /* Force backgrounds on print if needed (browsers block background colors by default) */
-  .template-creative .sidebar-col {
-    background: #f8fafc !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
   }
 }
 
@@ -2246,99 +2284,6 @@ button, input, textarea, select {
   font-weight: 700;
 }
 
-/* --- Print Styles for Perfect A4 PDFs --- */
-@media print {
-  html, body {
-    background: #ffffff !important;
-    color: #000000 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 210mm !important;
-    height: 297mm !important;
-    font-size: 9.5pt !important;
-    overflow: visible !important;
-  }
-
-  /* Reset application structure layout */
-  #root,
-  .app-root-layout,
-  .app-main-layout,
-  .builder-workspace,
-  .preview-panel,
-  .preview-container-wrapper {
-    display: block !important;
-    width: 210mm !important;
-    height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    overflow: visible !important;
-    transform: none !important;
-  }
-
-  /* Hide entire interactive layout elements */
-  .app-header,
-  .editor-panel,
-  .preview-controls,
-  .dashboard-view,
-  .analyser-view,
-  .preview-success-banner,
-  .copilot-chat-container,
-  .ai-form-column,
-  .ai-preview-empty-state,
-  .empty-icon-circle,
-  button,
-  footer {
-    display: none !important;
-  }
-
-  /* Target preview columns in AI wizard view */
-  .ai-builder-layout {
-    display: block !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  .ai-preview-column {
-    display: block !important;
-    width: 210mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* Configure the resume sheets to take up exact A4 dimension */
-  .resume-sheet {
-    width: 210mm !important;
-    height: 297mm !important;
-    margin: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    background: #ffffff !important;
-    page-break-after: always !important;
-    break-after: page !important;
-    page-break-inside: avoid !important;
-    position: relative !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-    transform: none !important;
-  }
-
-  /* Standard padding overrides for print */
-  .template-modern,
-  .template-creative,
-  .template-executive,
-  .template-tech,
-  .template-academic,
-  .template-raushan {
-    padding: 20mm !important;
-  }
-
-  @page {
-    size: A4;
-    margin: 0;
-  }
-}
 
 /* ==========================================================================
    Mobile & Tablet Responsiveness System (CSS overrides)
