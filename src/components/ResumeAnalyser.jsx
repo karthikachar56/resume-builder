@@ -29,6 +29,19 @@ export default function ResumeAnalyser({ resume, updateResume, setTab }) {
     }
   }, []);
 
+  const [showApiKey, setShowApiKey] = useState(false);
+
+  const handleApiKeyChange = (e) => {
+    const key = e.target.value;
+    setCustomApiKey(key);
+    localStorage.setItem('gemini_api_key', key);
+  };
+
+  const clearApiKey = () => {
+    setCustomApiKey('');
+    localStorage.removeItem('gemini_api_key');
+  };
+
   // Recalculate ATS score whenever the resume content changes or mode switches
   useEffect(() => {
     if (activeMode === 'workspace') {
