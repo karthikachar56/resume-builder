@@ -38,9 +38,9 @@ function categorizeSkills(skills) {
 function partitionResume(resume, template) {
   const pages = [];
   
-  // A4 height = 297mm. With 20mm padding top and bottom (40mm total),
-  // the budget is 257mm. We use 230mm for safe, unclipped formatting.
-  const PAGE_BUDGET = 230; 
+  // Set a large PAGE_BUDGET to ensure all content flows continuously without artificial JS splits.
+  // The browser printing engine will handle natural pagination and page breaks.
+  const PAGE_BUDGET = 999999; 
   
   let currentPageIndex = 0;
   let currentHeight = 0;

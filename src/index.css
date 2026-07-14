@@ -1525,26 +1525,21 @@ button, input, textarea, select {
     display: none !important;
   }
 
-  /* Configure the resume sheets to take up exact A4 dimension and page breaks */
+  /* Configure the resume sheets to allow continuous document flow and natural page breaks */
   .resume-sheet {
     width: 210mm !important;
-    height: 297mm !important;
-    min-height: 297mm !important;
+    height: auto !important; /* Grow naturally based on content length */
+    min-height: 297mm !important; /* Keep minimum height to cover at least one full page */
     margin: 0 auto !important;
     border: none !important;
     box-shadow: none !important;
     background: #ffffff !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
+    page-break-inside: auto !important; /* Allow the sheet to split across print pages naturally */
+    break-inside: auto !important;
     position: relative !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow: visible !important; /* Do not clip overflow content */
     transform: none !important;
-  }
-
-  .resume-sheet:not(:last-child) {
-    page-break-after: always !important;
-    break-after: page !important;
   }
 
   /* Standard padding overrides for print templates */
